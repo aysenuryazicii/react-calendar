@@ -1,42 +1,32 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Modal from "react-modal";
-/*
-const eventBox = document.querySelector("#event");
-let eventName;
-let clickedMonthNum, clickedDate, clickedYear;
-let dateBox;
-*/
+import DatePicker from "react-date-picker";
+
 const customStyles = {
   content: {
     top: "50%",
     left: "50%",
     right: "auto",
-    bottom: "auto",
+    bottom: "5px",
     marginRight: "-50%",
     transform: "translate(-50%, -50%)",
   },
 };
 
 Modal.setAppElement("#root");
+var db = openDatabase("mydb.db", "1.0", "description", 1);
 
-function Modals(props) {
-  const months = props.months;
-  const clickedMonth = months[props.dates.getMonth()];
+function Modals({ eventDate, newDate }) {
+  eventDate.setDate(1);
+  let firstDayStart = eventDate.getDay();
 
+  const [event, setEvent] = useState("");
   const [modalIsOpen, setIsOpen] = React.useState(false);
-  /*
-  dateBox = document.querySelectorAll(".date");
+  const [date, setDate] = useState(newDate);
 
-  dateBox.forEach((dateBox) =>
-    dateBox.addEventListener("click", function () {
-      dateBox.classList.add("clicked-date");
-      clickedDate = dateBox.textContent;
-      clickedMonth = months[props.dates.getMonth()];
-      clickedYear = props.dates.getFullYear();
-    })
-  );
-  function dateBox() {}
-  */
+  if (firstDayStart <= 0) {
+    firstDayStart = 7;
+  }
 
   function openModal() {
     setIsOpen(true);
@@ -46,34 +36,114 @@ function Modals(props) {
     setIsOpen(false);
   }
 
+  function updateCal() {
+    setDate(newDate);
+  }
+
   function btnEkleme(e) {
     e.preventDefault();
-    console.log("ekle");
+
+    const eventDiv = document.createElement("p");
+    eventDiv.classList.add("event-name");
+    eventDiv.textContent = event;
+
+    const a = document.querySelector(
+      `#root > div > div.container > div > div.days-container > div > div:nth-child(${
+        date.getDate() + firstDayStart - 1
+      })`
+    );
+
+    a.prepend(eventDiv);
+
+    InsertSQL(date.getDate(), date.getMonth() + 1, date.getFullYear(), event);
     closeModal();
   }
 
   function btnSilme(e) {
     e.preventDefault();
-    console.log("sil");
+
+    const b = document.querySelector(
+      `#root > div > div.container > div > div.days-container > div > div:nth-child(${
+        date.getDate() + firstDayStart - 1
+      })`
+    );
+
+    if (
+      b &&
+      b.firstElementChild &&
+      b.firstElementChild !== document.querySelector(".badge")
+    )
+      b.firstElementChild.textContent = "";
+
+    deleteSQL(date.getDate(), date.getMonth() + 1, date.getFullYear());
     closeModal();
   }
 
   function btnGuncelleme(e) {
     e.preventDefault();
-    /*
-    //clickedMonthNum = months.findIndex((month) => month === clickedMonth);
-    if (eventBox.value) eventName = eventBox.value;
-    else return;
-    eventBox.value = "";
 
-    const eventDiv = document.createElement("p");
-    eventDiv.classList.add("event-name");
-    eventDiv.textContent = eventName;
-    document.querySelector(".clicked-date")?.prepend(eventDiv);
+    const c = document.querySelector(
+      `#root > div > div.container > div > div.days-container > div > div:nth-child(${
+        date.getDate() + firstDayStart - 1
+      })`
+    );
 
-    //document.querySelector(".clicked-date")?.classList.remove("clicked-date");
-*/
+    if (
+      c &&
+      c.firstElementChild &&
+      c.firstElementChild !== document.querySelector(".badge")
+    )
+      c.firstElementChild.textContent = event;
+
+    updateSQL(date.getDate(), date.getMonth() + 1, date.getFullYear(), event);
     closeModal();
+  }
+
+  function InsertSQL(clickedDate, clickedMonth, clickedYear, eventName) {
+    db.transaction(function (tx) {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS Events_Table(day, month, year, event)"
+      );
+      tx.executeSql(
+        "INSERT INTO Events_Table(day,month,year,event) VALUES (" +
+          clickedDate +
+          "," +
+          clickedMonth +
+          "," +
+          clickedYear +
+          "," +
+          `"${eventName}"` +
+          ")"
+      );
+    });
+  }
+
+  function deleteSQL(clickedDate, clickedMonth, clickedYear) {
+    db.transaction(function (tx) {
+      tx.executeSql(
+        "DELETE FROM Events_Table WHERE day=" +
+          clickedDate +
+          " AND month=" +
+          clickedMonth +
+          " AND year=" +
+          clickedYear
+      );
+    });
+  }
+
+  function updateSQL(clickedDate, clickedMonth, clickedYear, eventName) {
+    db.transaction(function (tx) {
+      tx.executeSql(
+        "UPDATE Events_Table SET event=" +
+          `"${eventName}"` +
+          " WHERE day=" +
+          clickedDate +
+          " AND month=" +
+          clickedMonth +
+          " AND year=" +
+          clickedYear
+      );
+    });
   }
 
   return (
@@ -87,25 +157,29 @@ function Modals(props) {
         style={customStyles}
         contentLabel="Example Modal"
       >
-        <form>
-          <label htmlFor="event">Olay:</label>
-          <input
-            type="text"
-            id="event"
-            name="event"
-            placeholder="Olayı giriniz"
-          />
-          <br />
-          <button onClick={btnEkleme} className="btn btn-ekleme">
-            EKLE
-          </button>
-          <button onClick={btnSilme} className="btn btn-silme">
-            SİL
-          </button>
-          <button onClick={btnGuncelleme} className="btn btn-guncelleme">
-            GÜNCELLE
-          </button>
-        </form>
+        <DatePicker className="datepicker" onChange={setDate} value={date} />
+        <div className="formButton">
+          <form>
+            <label htmlFor="event">Etkinlik: </label>
+            <input
+              type="text"
+              id="event"
+              name="event"
+              placeholder="Etkinlik giriniz"
+              onChange={(e) => setEvent(e.target.value)}
+            />
+            <br />
+            <button onClick={btnEkleme} className="btn btn-ekleme">
+              EKLE
+            </button>
+            <button onClick={btnSilme} className="btn btn-silme">
+              SİL
+            </button>
+            <button onClick={btnGuncelleme} className="btn btn-guncelleme">
+              GÜNCELLE
+            </button>
+          </form>
+        </div>
       </Modal>
     </div>
   );

@@ -19,23 +19,34 @@ const months = [
 ];
 
 var date = new Date();
-class NextPrev extends React.Component {
-  state = { dateOf: date };
+var eventDate = new Date();
 
-  today = () => {
+class NextPrev extends React.Component {
+  state = {
+    date: date,
+    eventDate: eventDate,
+  };
+
+  today = (e) => {
+    e.preventDefault();
+
     date.setMonth(new Date().getMonth());
     date.setFullYear(new Date().getFullYear());
-    this.setState({ dateOf: date });
+    this.setState({ date: date });
   };
 
-  leftBtn = () => {
+  leftBtn = (e) => {
+    e.preventDefault();
+
     date.setMonth(date.getMonth() - 1);
-    this.setState({ dateOf: date });
+    this.setState({ date: date });
   };
 
-  rightBtn = () => {
+  rightBtn = (e) => {
+    e.preventDefault();
+
     date.setMonth(date.getMonth() + 1);
-    this.setState({ dateOf: date });
+    this.setState({ date: date });
   };
 
   render() {
@@ -69,11 +80,11 @@ class NextPrev extends React.Component {
               <div className="weekends">Paz</div>
             </div>
             <div className="days-container">
-              <Calculate dates={date} />
+              <Calculate date={date} />
             </div>
           </div>
         </div>
-        <Modal dates={date} months={months} />
+        <Modal eventDate={date} newDate={date} />
 
         <footer>
           <div>

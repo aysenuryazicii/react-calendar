@@ -145,14 +145,22 @@ h1 {
   justify-content: center;
 }
 
+.formButton {
+  padding-top: 20px;
+}
+
+.datepicker {
+  width: 100%;
+}
+
 label[for="event"] {
   color: var(--dark--calendar);
-  font-size: 15px;
+  font-size: 13px;
 }
 
 input {
-  width: 80%;
-  margin-bottom: 2px;
+  width: 72%;
+  margin-bottom: 5px;
 }
 
 .event-name {

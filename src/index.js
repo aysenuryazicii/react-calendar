@@ -1,10 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "./App.css";
-import NextPrev from "./NextPrev";
+import App from "./App";
 
-const App = function () {
-  return <NextPrev />;
+const Apps = function () {
+  return <App />;
 };
 
-ReactDOM.render(<App />, document.querySelector("#root"));
+ReactDOM.render(<Apps />, document.querySelector("#root"));
