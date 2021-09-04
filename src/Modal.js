@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Modal from "react-modal";
 import DatePicker from "react-date-picker";
 
@@ -36,10 +36,6 @@ function Modals({ eventDate, newDate }) {
     setIsOpen(false);
   }
 
-  function updateCal() {
-    setDate(newDate);
-  }
-
   function btnEkleme(e) {
     e.preventDefault();
 
@@ -47,13 +43,14 @@ function Modals({ eventDate, newDate }) {
     eventDiv.classList.add("event-name");
     eventDiv.textContent = event;
 
-    const a = document.querySelector(
-      `#root > div > div.container > div > div.days-container > div > div:nth-child(${
-        date.getDate() + firstDayStart - 1
-      })`
-    );
-
-    a.prepend(eventDiv);
+    if (date.getMonth() === newDate.getMonth()) {
+      const a = document.querySelector(
+        `#root > div > div.container > div > div.days-container > div > div:nth-child(${
+          date.getDate() + firstDayStart - 1
+        })`
+      );
+      a.prepend(eventDiv);
+    }
 
     InsertSQL(date.getDate(), date.getMonth() + 1, date.getFullYear(), event);
     closeModal();
@@ -157,7 +154,11 @@ function Modals({ eventDate, newDate }) {
         style={customStyles}
         contentLabel="Example Modal"
       >
-        <DatePicker className="datepicker" onChange={setDate} value={date} />
+        <DatePicker
+          className="datepicker"
+          onChange={setDate}
+          value={date}
+        ></DatePicker>
         <div className="formButton">
           <form>
             <label htmlFor="event">Etkinlik: </label>
